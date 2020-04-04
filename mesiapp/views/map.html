@@ -1,0 +1,128 @@
+<!doctype html>
+<html>
+
+<head>
+    <title>メシアプリ</title>
+    <!-- bootstrap -->
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+        integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <script>
+        window.addEventListener("load", function () {
+
+        }, true);
+    </script>
+
+</head>
+
+<body>
+    <!-- navbar-->
+    <nav class="navbar navbar-expand navbar-dark bg-primary">
+        <a class="navbar-brand" href="#">メシアプリ</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav mr-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="/">撮影</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/photo">写真</a>
+                </li>
+                <li class="nav-item active">
+                    <a class="nav-link" href="/map">地図<span class="sr-only">(current)</span></a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+    <!-- main-->
+    <main roll="main" class="container">
+        <script type="text/javascript" src="//maps.google.com/maps/api/js?sensor=false"></script>
+        <div id="map" style="width: 100%; height: 400px;"></div>
+        <p>半径1km以内の投稿箇所を表示</p>
+        <!-- <div class="btn-group btn-group-toggle" data-toggle="buttons" id=>
+            <label class="btn btn-primary active">
+              <input type="radio" name="options" id="option1" autocomplete="off" checked> 半径1km以内
+            </label>
+            <label class="btn btn-primary">
+              <input type="radio" name="options" id="option2" autocomplete="off"> 半径5km以内
+            </label>
+            <label class="btn btn-primary">
+              <input type="radio" name="options" id="option3" autocomplete="off"> 半径30km以内
+            </label>
+          </div> -->
+        <script type="text/javascript">
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(function (position) {
+                    // gps 情報(現在位置)
+                    var latitude = position.coords.latitude;
+                    var longitude = position.coords.longitude;
+                    var myMap = new google.maps.Map(document.getElementById("map"), {
+                        // ズームレベル
+                        zoom: 14,
+                        // 中心点緯度経度
+                        center: new google.maps.LatLng(latitude, longitude),
+                        // 距離目盛りの表示
+                        scaleControl: true,
+                        // 地図の種類
+                        mapTypeId: google.maps.MapTypeId.ROADMAP
+                    });
+                    //現在位置マーカー
+                    var myMarker = new google.maps.Marker({
+                        position: new google.maps.LatLng(latitude, longitude),
+                        map: myMap
+                    });
+                    var myInfoWindow = new google.maps.InfoWindow({
+                        // 吹き出しに出す文
+                        content: "現在位置"
+                    });
+                    // 吹き出しを開く
+                    myInfoWindow.open(myMap, myMarker);
+                    // 店マーカー
+                    $.get("/api/" + latitude + "/" + longitude + "/1", function (data) {
+                        console.log(data);
+                        data.forEach(element => {
+                            var marker = new google.maps.Marker({
+                                position: { lat: element.latitude, lng: element.longitude },
+                                map: myMap
+                            });
+                            var infoWindw = new google.maps.InfoWindow({
+                                content: element.submitter + "さんの投稿場所"
+                            });
+                            infoWindw.open(myMap, marker);
+                        });
+                    });
+                });
+
+            } else {
+                console.log("error");
+            }
+
+        </script>
+    </main>
+
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js"
+        integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
+        integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
+        crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"
+        integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
+        crossorigin="anonymous"></script>
+    <script>
+        $(function () {
+
+        });
+    </script>
+</body>
+
+</html>

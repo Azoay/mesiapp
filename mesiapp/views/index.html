@@ -1,0 +1,162 @@
+<!doctype html>
+<html>
+
+<head>
+    <title>メシアプリ</title>
+    <!-- bootstrap -->
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+        integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <script>
+        window.addEventListener("load", function () {
+
+            if (!window.File) {
+                result.innerHTML = "File API 使用不可";
+                return;
+            }
+            document.getElementById("imageFile").addEventListener("change", function () {
+                var reader = new FileReader();
+
+                reader.onload = function (event) {
+                    document.getElementById("image").src = reader.result;
+                }
+                var file = document.getElementById("imageFile").files[0];
+                reader.readAsDataURL(file);
+            }, true);
+        }, true);
+    </script>
+
+</head>
+
+<body>
+    <!-- navbar-->
+    <nav class="navbar navbar-expand navbar-dark bg-primary">
+        <a class="navbar-brand" href="#">メシアプリ</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav mr-auto">
+                <li class="nav-item active">
+                    <a class="nav-link" href="/">撮影 <span class="sr-only">(current)</span></a>
+                </li>
+                <li class="nav-item">
+                        <a class="nav-link" href="/photo">写真</a>
+                    </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/map">地図</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+    <!-- main-->
+    <main roll="main" class="container">
+        <img id="image" width="100%" height=" auto">
+
+        <form id="uploadForm">
+            <div class="form-group">
+                <input type="file" class="form-control-file" accept="image/*;capture=camera" id="imageFile"
+                    name="file" />
+            </div>
+            <div class="form-group">
+                <div class="form-row">
+                    <div class="input-group mb-2">
+                        <div class="input-group-prepend">
+                            <div class="input-group-text">投稿者名</div>
+                        </div>
+                        <input type="text" class="form-control" name="name" value="匿名さん">
+                    </div>
+                </div>
+            </div>
+            <button class="btn btn-primary" id="upload_gps">投稿(GPS情報付き)</button>
+            <button class="btn btn-primary" id="upload">投稿</button>
+        </form>
+    </main>
+
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js"
+        integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
+        integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
+        crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"
+        integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
+        crossorigin="anonymous"></script>
+    <script>
+        $(function () {
+            // アップロード開始ボタンがクリックされたら
+            $('#upload_gps').click(function () {
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(function (position) {
+                        var data = new FormData($('#uploadForm').get(0));
+                        var submitter = data.get("name");
+                        // file check
+                        if (data.get("file").size === 0) {
+                            alert("ファイルを選択して下さい。");
+                            return false;
+                        }
+                        // gps 情報を付与
+                        data.append("latitude", position.coords.latitude);
+                        data.append("longitude", position.coords.longitude);
+                        $.ajax({
+                            url: "/upload", // 送信先
+                            type: 'POST',
+                            data: data,
+                            dataType: "html",
+                            processData: false,
+                            contentType: false
+                        }).done(function (data, textStatus, jqXHR) {
+                            // 送信成功
+                            alert("success\n投稿者：" + submitter + "\n緯度："+position.coords.latitude +"\n経度："+position.coords.longitude);
+                        }).fail(function (jqXHR, textStatus, errorThrown) {
+                            // 送信失敗
+                            alert("failed");
+                        });
+                        return false;
+                    });
+
+                }
+                return false;
+            });
+            // アップロード開始ボタンがクリックされたら
+            $('#upload').click(function () {
+                var data = new FormData($('#uploadForm').get(0));
+                var submitter = data.get("name");
+                // formdata check debug
+                // for (let value of data.entries()) {
+                //     console.log(value);
+                // }
+                // file check
+                if (data.get("file").size === 0) {
+                    alert("ファイルを選択して下さい。");
+                    return false;
+                }
+                console.log(data.get("file"));
+                $.ajax({
+                    url: "/upload", // 送信先
+                    type: 'POST',
+                    data: data,
+                    dataType: "html",
+                    processData: false,
+                    contentType: false
+                }).done(function (data, textStatus, jqXHR) {
+                    // 送信成功
+                    alert("success\n投稿者：" + submitter);
+                }).fail(function (jqXHR, textStatus, errorThrown) {
+                    // 送信失敗
+                    alert("failed");
+                });
+                return false;
+            });
+        });
+    </script>
+</body>
+
+</html>
